@@ -266,10 +266,44 @@ void branch(uint16_t instruction) {
 void jump(uint16_t instruction) { 
     /*
     note : RET instruction is special case of JMP instruction in assemlby and happens when R1 register value is 0x7 
+           RED always loads R7
      */
     uint16_t r1 = (instruction >> 6) & 0x7; 
     // jump to the content of the registers R1  by pointing PC to value of R1 register 
     registers[R_PC] = registers[r1]; 
+}
+
+
+void jumpToSubroutine(uint16_t instruction) { 
+    /* Instruction Format:
+  JSR mode:
+    15         11  PCOffset11                   0
+    |-------------------------------------------|
+    | 0 1 0 0 | 1 | P P P | P P P | P P P | P P |
+    |-------------------------------------------|
+    P P P P P P P P P P P = PCOffset11
+  JSRR mode:
+    15         11        Register               0
+    |-------------------------------------------|
+    | 0 1 0 0 | 0 | 0 0 | R R R | 0 0 0 0 0 0   |
+    |-------------------------------------------|
+    R R R = 3-bit base register
+  */
+
+    // Get the base register
+    uint16_t baseRegister = (instruction >> 6) & 0x7; 
+    uint16_t pcOffset11 = instruction & 0x7Ff; 
+    uint16_t signExtendedPCoffset = sign_extend(PCOffset11, 11); 
+    registers[R_R7] = registers[R_PC];
+    uint16_t long_flag = (instruction >> 11) & 1 ; 
+
+    if (long_flag) { 
+        registers[R_PC] += signExtendedPCoffset;  // JSR
+    }
+    else { 
+        registers[R_PC] = registers[baseRegister];  // JSRR
+    }
+    break; 
 }
 
 
