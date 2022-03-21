@@ -261,7 +261,15 @@ void branch(uint16_t instruction) {
          // if branch conditions are met, branch 
          registers[R_PC] += signedExtendedpcOffset ;  
      }
+}
 
+void jump(uint16_t instruction) { 
+    /*
+    note : RET instruction is special case of JMP instruction in assemlby and happens when R1 register value is 0x7 
+     */
+    uint16_t r1 = (instruction >> 6) & 0x7; 
+    // jump to the content of the registers R1  by pointing PC to value of R1 register 
+    registers[R_PC] = registers[r1]; 
 }
 
 
