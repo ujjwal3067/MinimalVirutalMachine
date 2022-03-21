@@ -9,23 +9,22 @@ uint16_t check_key() {
 
 
 /* 
-  Any time a value is written to a register we need to update 
+  Any time a value is written to a registers we need to update 
   the flags to indicate its sign. 
 
  */
 void update_flags(uint16_t r) { 
 
-    if(reg[r] == 0 ) { 
+    if(registers[r] == 0 ) { 
 
-        reg[R_COND] = FL_ZERO;  // a 1 in the left-most bit indicates negative
+        registers[R_COND] = FL_ZERO;  // a 1 in the left-most bit indicates negative
 
-    }else if (reg[r] >> 15) 
+    }else if (registers[r] >> 15) 
     { 
-        reg[R_COND] >> FL_NEG; 
+        registers[R_COND] >> FL_NEG; 
     }else { 
-        reg[R_COND]  = FL_POS;
+        registers[R_COND]  = FL_POS;
     }
-
 }
 
 void mem_write(uint16_t address, uint16_t val) { 

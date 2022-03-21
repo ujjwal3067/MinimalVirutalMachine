@@ -12,35 +12,6 @@
 #include <sys/termios.h>
 #include <sys/mman.h>
 
-// 65536 memory locations
-// 16 bit memory slots 
-uint16_t memory[UINT16_MAX];
-
-
-// 16 bit registers
-/* 3 registers
- * 8 general purpose registers (r0-r7)
- * 1 program counter ( PC  ) register
- * 1 condition flags ( COND ) register
- */
-  
-enum { 
-    R_R0 = 0, 
-    R_R1,  
-    R_R2,  
-    R_R3,  
-    R_R4,  
-    R_R5,  
-    R_R6,  
-    R_R7,  
-    R_PC, 
-    R_COND, 
-    R_COUNT
-};
-
-
-uint16_t reg[R_COUNT];
-
 /*
  * Instruction sets ;
  *
@@ -67,31 +38,22 @@ enum {
     OP_TRAP,   // execute trap 
 };
 
-/**
- * 3 Conditional flags
- * ( indicates the sign of previouse calculation)
- */
-enum { 
-    FL_POS = 1 << 0, // P 
-    FL_ZRO = 1 << 1, // Z 
-    FL_NEG = 1 << 2, // N 
-};
 
 int main (int argc, const char * argv[]) { 
     // since exactly one condition flag should be set at any given time, set the Z flag
-    reg[R_COND] = FL_ZRO; 
+    registers[R_COND] = FL_ZRO; 
     // set the PC ( program counter ) to starting position 
     // 0x3000 is the default
     enum { 
         PC_START = 0x3000
     };
-    reg[R_PC] = PC_START;  
+    registers[R_PC] = PC_START;  
 
     int running = 1; 
     while (running) { 
 
         // FETCH 
-        uint16_t instr = mem_read(reg[R_PC]++);
+        uint16_t instr = mem_read(registers[R_PC]++);
         uint16_t op = instr >> 12 ;  // opcode
 
         switch (op)
