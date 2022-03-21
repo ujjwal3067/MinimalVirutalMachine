@@ -76,4 +76,31 @@ void add(uint16_t instruction) {
         R0 = DR
   */
 
+    // [note] : instruction = op_code bits : 
+    // for ADD : od_code = 0b0001
+    
+
+    // get destination register ( DR )
+    uint16_t r0 = (instruction >> 9 ) & 0x7 ; 
+
+    // get source 1 register : first operand ( SR1)
+    uint16_t r1 = (instruction >> 6) & 0x7; 
+
+    // get immediate mode flag  
+    uint16_t imm_flag = (instr >> 5) & 0x1; 
+
+    // if  immediate mode
+    if (imm_flag) {   
+        // sign extend the immediate value i.e. imm5 
+        uint16_t imm5 = sign_extend(instruction & 0x1F, 5);
+        register[r0] = register[r1] + imm5 ; 
+
+    // if register mode
+    }else { 
+        uint16_t r2 = instruction & 0x7 ; 
+        registers[r0] = registers[r1] + registers[r2]; 
+    }
+
+    // update the register flag ( based on result of instruction just performed)
+    update_flags(r0);     
 }
