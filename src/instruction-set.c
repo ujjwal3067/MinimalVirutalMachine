@@ -306,3 +306,73 @@ void jumpToSubroutine(uint16_t instruction) {
     break; 
 }
 
+
+void load(uint16_t instruction) { 
+/*
+ * Instruction format
+ An address is computed by sign-extending bits [8:0] to 16 bits and adding this value to the incremented PC.
+ The contents of memory at this address are loaded into DR. The condition codes are set,
+ based on whether the value loaded is negative, zero, or positive.
+
+    15          Dest   PCOffset9                0
+    |-------------------------------------------|
+    | 0 0 1 0 | D D D | P P P P P P P P P       |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 0 0 1 0 |   DR  |     PCoffset9           |
+    |-------------------------------------------|
+
+    DR = D D D = 3-bit Destination Register
+    P P P P P P P P P = PCOffset9
+    Sign extend ( from 9 bit to 16 bit ) PCOffset9 and add to PC ( 16 bit ).
+    Load the value at that memory address into destination
+ */
+    // get the destination register
+    uint16_t r0 = (instruction >> 9) & 0x7; 
+    uint16_t PCoffset9 = instruction & 0x1FF; 
+    uint16_t pc_offset = sign_extend(PCoffset9, 9);  
+    reg[r0] = mem_read(reg[R_PC], + pc_offset); 
+    update_flags(r0);
+}
+
+
+
+void loadRegister(uint16_t instruction) { 
+
+    /* Instruction Format:
+     
+    15          Dest   Base     Offset6         0
+    |-------------------------------------------|
+    | 0 1 1 0 | D D D | B B B | O O O O O O     |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 0 1 1 0 |  DR   | BaseR  |  offset6       |
+    |-------------------------------------------|
+
+
+    DR = D D D = 3-bit Destination Register
+    BaseR = B B B = 3-bit Base Register
+    offset6 = O O O O O O = 6-bit offset
+
+    Sign extend the offset, add this value to
+    the value in the base register. Read the 
+    memory at this location and load into
+    destination
+
+    
+    note : An address is computed by sign-extending bits [5:0] (offset6) to 16 bits and adding this value to
+    the contents of the register specified by bits [8:6](baseR). 
+    The contents of memory at this address are loaded into DR. The condition codes are set,
+    based on whether the value loaded is negative, zero, or positive (updating flags).
+    */
+
+
+    uint16_t r0 = (instruction >> 9) & 0x7 ;  // DR
+    uint16_t r1 = (instruction >> 6) & 0x7 ; 
+    uint16_t offset = sign_extend(instruction & 0x3F ,6);
+    registers[r0] = mem_read(registers[r1] + offset); 
+    update_flags(r0); 
+}
+
