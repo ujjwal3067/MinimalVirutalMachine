@@ -376,3 +376,37 @@ void loadRegister(uint16_t instruction) {
     update_flags(r0); 
 }
 
+
+void loadEffectiveAddress(uint16_t instruction) { 
+
+    /*
+     Instruciton set
+
+
+     15          Dest   PCOffset9                0
+    |-------------------------------------------|
+    | 1 1 1 0 | D D D | P P P P P P P P P       |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 1 1 1 0 |  DR   |       offset9           |
+    |-------------------------------------------|
+
+    D D D = 3-bit Destination Register
+    P P P P P P P P P = PCOffset9
+    Sign extend PCOffset9, add to PC, and store
+    that ADDRESS in the destination register
+
+
+    note : An address is computed by sign-extending bits [8:0] to 16 bits and 
+    adding this value to the incremented PC. 
+    This address is loaded into DR.‡ The condition codes are set, 
+    based on whether the value loaded is negative, zero, or positive. 
+     */
+
+    uint16_t r0 =  (instruction >> 9) & 0x7 ;// DR
+    uint16_t offset9  = instruction & 0x1FF; 
+    uint16_t pc_offset = sign_extend(offset9 , 9); 
+    registers[r0] = registers[R_PC] + pc_offset; 
+    update_flags(r0);
+} 
