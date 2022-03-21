@@ -292,7 +292,7 @@ void jumpToSubroutine(uint16_t instruction) {
 
     // Get the base register
     uint16_t baseRegister = (instruction >> 6) & 0x7; 
-    uint16_t pcOffset11 = instruction & 0x7Ff; 
+    uint16_t PCOffset11 = instruction & 0x7Ff; 
     uint16_t signExtendedPCoffset = sign_extend(PCOffset11, 11); 
     registers[R_R7] = registers[R_PC];
     uint16_t long_flag = (instruction >> 11) & 1 ; 
@@ -305,5 +305,4 @@ void jumpToSubroutine(uint16_t instruction) {
     }
     break; 
 }
-
 
