@@ -12,33 +12,6 @@
 #include <sys/termios.h>
 #include <sys/mman.h>
 
-/*
- * Instruction sets ;
- *
- * 16 bit : 4 bits + 12 bits
- *  where 4 bit = opcode  & 12 bits for storing parameters
- *
- */
-
-enum { 
-    OP_BR = 0, // branch 
-    OP_ADD,    // add
-    OP_LD,     // load
-    OP_ST,     // store
-    OP_JSR,    // jump register
-    OP_LDR,    // load register
-    OP_STR,    // store register
-    OP_RTI,    // unused
-    OP_NOT,    // bitwise not
-    OP_LDI,    // load indirect
-    OP_STI,    // store indirect
-    OP_JMP,    // jump 
-    OP_RES,    // reserved( unused )
-    OP_LEA,    // load effective  address
-    OP_TRAP,   // execute trap 
-};
-
-
 int main (int argc, const char * argv[]) { 
     // since exactly one condition flag should be set at any given time, set the Z flag
     registers[R_COND] = FL_ZRO; 
