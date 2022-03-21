@@ -94,6 +94,7 @@ int main (int argc, const char * argv[]) {
             printf("failed to load image : %s\n", argv[j]); 
             exit(1);
         }
-    }
+    } 
+    
 
 }
