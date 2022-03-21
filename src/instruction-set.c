@@ -105,7 +105,7 @@ void add(uint16_t instruction) {
     update_flags(r0);     
 }
 
-void loadIndirect(uint16_t destination) { 
+void loadIndirect(uint16_t instruction) { 
      /* 
       
     load indirect : this instruction is used to load a value from a location in memory into register
@@ -147,8 +147,7 @@ void loadIndirect(uint16_t destination) {
     Address     label       Value
     0x123       for_data    0x456 
     0x456       string      "a"
-
-    if PC was at 0x100
+if PC was at 0x100
     LDI R0 0x023
     would load 'a' into R0 
 
@@ -162,7 +161,54 @@ void loadIndirect(uint16_t destination) {
     // add pc_offset to the current PC, look at that memory location to get the final address.  
     registers[r0] = mem_read(mem_read(registers[R_PC] + pc_offset)); 
     update_flags(r0); 
+}
+
+void and(uint16_t instruction) { 
+    /*
+   Instruction Format:
+    15          Dest   Src1   Mode       Src2   0
+    |-------------------------------------------|
+    | 0 1 0 1 | D D D | A A A | 0 | 0 0 | B B B |
+    |-------------------------------------------|
+
+    DR    = D D D     = 3-bit Destination Register 
+    SR1   = A A A     = 3-bit Source 1 Register
+    SR2   = I I I I I = 5-bit Immediate Value Two's Complement Integer
 
 
+    Immediate mode (Mode bit 1):
+
+    15          Dest    Src1  Mode  Immediate   0
+    |-------------------------------------------|
+    | 0 1 0 1 | D D D | A A A | 1 | I I I I I   |
+    |-------------------------------------------|
+
+    D D D = 3-bit Destination Register
+    A A A = 3-bit Source 1 Register
+    I I I I I = 5-bit Immediate Value Two's Complement Integer
+    NOTE: The immediate value must be sign extended
+
+    */
+
+    // Desitnation register (DR)
+    uint16_t r0 = (instruction >> 9 ) & 0x7; 
+    // get the source register (SR1)
+     
+    uint16_t r1 = (instruction >> 6) & 0x7 ; 
+
+    // get immediate mode flag  
+    uint16_t imm_flag = (instruction >> 5) & 0x1; 
+
+    if (imm_flag) { 
+        // signed extend the immediate value
+        uint16_t immediateValue = instruction  & 0x1F;  
+        uint16_t signExtendedImmediateValue = sign_extend(immediateValue, 5);
+        registers[r0] = registers[r1] & signExtendedImmediateValue; 
+    }else { 
+        uint16_t r2 = instruction & 0x7 ; 
+        registers[r0] = registers[r1] & registers[r2]; 
+    }
+
+    update_flags(r0); 
 
 }
