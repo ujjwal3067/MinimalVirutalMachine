@@ -210,5 +210,58 @@ void and(uint16_t instruction) {
     }
 
     update_flags(r0); 
+}
+
+void branch(uint16_t instruction) { 
+    /*
+   Instruction Format:
+    15          Flags   PCOffset9                0
+    |-------------------------------------------|
+    | 1 0 1 0 | N Z P | P P P P P P P P P       |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 1 0 1 0 | N|Z|P |     PCoffset9           |
+    |-------------------------------------------|
+
+
+    N = Negative Flag ( BRN )
+    Z = Zero Flag ( BRZ )
+    P = positive Flag ( BRP )
+    P P P P P P P P P P   =  Pcoffset9
+
+    Flags can be combined to produce additional branch opcodes : 
+    BRZP
+    BRNP
+    BRNZ
+    BRNZP ( also equal to BR )
+
+
+    if N bit is set, N is tested else N is not tested
+    if Z bit is set, Z is test else Z is not tested etc. 
+
+    how does it work ? : 
+    If any of the condition codes tested is set, the program branches to the location 
+    specified by adding the sign-extended PCoffset9 field to the incrementd PC. 
+
+
+    Sign Extend PCoffset9 and add to PC
+
+     */
+
+    // Get PCoffset9
+     uint16_t pcOffset9 = instruction & 0x1FF; 
+     uint16_t signedExtendedpcOffset = sign_extend(pcOffset9, 9);
+
+
+     // Get the Flag
+      
+     uint16_t conditionalFlag = (instruction >> 9) & 0x7; 
+     if (conditionalFlag & registers[R_COND]) { 
+         // if branch conditions are met, branch 
+         registers[R_PC] += signedExtendedpcOffset ;  
+     }
 
 }
+
+
