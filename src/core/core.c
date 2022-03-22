@@ -5,12 +5,14 @@
 #include<sys/time.h> 
 
 uint16_t check_key() { 
+
 }
 
 
 /* 
   Any time a value is written to a registers we need to update 
   the flags to indicate its sign. 
+
 
  */
 void update_flags(uint16_t r) { 
@@ -29,13 +31,13 @@ void update_flags(uint16_t r) {
 
 
 
-// memory access ( write )
+// Memory Access ( write )
 void mem_write(uint16_t address, uint16_t val) {
     memory[address] = val; 
 }
 
 
-// memory access ( read )
+// Memory Access ( read )
 uint16_t mem_read(uint16_t address) { 
     if(address == MR_KBSR) { 
         if(check_key()) { 
