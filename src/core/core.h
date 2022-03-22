@@ -32,6 +32,13 @@ enum {
 
 uint16_t registers[R_COUNT];
 
+// memory mapped registers
+// used for keyboard device
+enum { 
+    MR_KBSR = 0xFE00;  // keyboard status
+    MR_KBDR = 0xFE02 ; // keyboard data
+};
+
 /**
  * 3 Conditional flags
  * ( indicates the sign of previous calculation)
