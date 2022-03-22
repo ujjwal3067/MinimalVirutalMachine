@@ -5,6 +5,8 @@
 // Convert Big Endian to little endian 
 
 
+// big    endian 0x 12 34 56
+// little endian 0x 56 34 21 ( chunks in reverse )
 uint16_t swap16(uint16_t x) { 
     return ( x << 8 ) | (x >> 8); 
 
