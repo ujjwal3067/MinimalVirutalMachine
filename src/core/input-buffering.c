@@ -19,3 +19,9 @@ void disable_input_buffering() {
 void restore_input_buffering() { 
     tcgetattr(STDIN_FILENO, TCSANOW, &original_tio);
 }
+
+void handle_interrupt(int signal) { 
+    restore_input_buffering(); 
+    printf("\n"); 
+    exit(-2); 
+}
