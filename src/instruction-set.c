@@ -501,3 +501,37 @@ void storeIndirect(uint16_t instruction){
     uint16_t address = mem_read(registers[R_PC] + pc_offet); 
     mem_write(address, registers[r0]); // writing address content in r0 register 
 }
+
+void storeRegister(uint16_t instruction) { 
+      /* Instruction Format:
+    15          Src    Base     Offset6         0
+
+    |-------------------------------------------|
+    | 0 1 1 1 | S S S | B B B | O O O O O O     |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 0 1 1 1 |  SR  | BaseR  |   offset6       |
+    |-------------------------------------------|
+
+    SR          = S S S = 3-bit Destination Register
+    BaseR       = B B B = 3-bit Base Register
+    O O O O O O = 6-bit offset
+
+    Sign extend the offset, add this value to
+    the value in the base register. Read the 
+    value in the source register and store
+    into memory at the computed address
+
+    note : The contents of the register specified by SR are stored in the memory location 
+    whose address is computed by
+    sign-extending bits [5:0] to 16 bits and adding this value to the contents of the register
+    specified by bits [8:6].
+
+  */
+    uint16_t r0 = (instruction >> 8) & 0x7 ;  // source register
+    uint16_t r1 = (instruction >> 6) & 0x7 ; 
+    uint16_t offset = sign_extend(instruction & 0x3F, 6); 
+    uint16_t address = registers[r1]+ offset; 
+    mem_write(address, registers[r0]); 
+}
