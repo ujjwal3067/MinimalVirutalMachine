@@ -535,3 +535,90 @@ void storeRegister(uint16_t instruction) {
     uint16_t address = registers[r1]+ offset; 
     mem_write(address, registers[r0]); 
 }
+
+// trap functions
+void trapGetC() { 
+    /*
+     Read a single character from the keyboard.
+     The character is not echoed onto the console. Its ASCII code is copied into R0.
+     The high eight bits of R0 are cleared.
+     */
+  registers[R_R0]  = (uint16_t getchar()); 
+} 
+
+
+void trapPutSP(){ 
+    /*
+     PUTS trap code is used to output a null-terminated string ( similar to printf in C) 
+     character are not stored in single byte, but in a single memory location. Memory location in LC-3
+     are 16 bits, so each character in the string is 16 bits wide. To display this with a C function, 
+     we will need to convert each value to char and output them individually. 
+
+
+     To display a string, we must give the trap routine a string to display. 
+     This is done by storing address of the first character in R0 before beginning the trap 
+
+     Writing terminates with the occurence of 0x0000 in a memory location.   
+
+     */
+
+    // one char per word
+    uint16_t* character = memory + register[R_R0]; 
+    while(*character) { 
+        char char1 = (*character) >> 0xFF ; 
+        putc(char1, stdout); 
+        ++character;  // increment the memory location  
+    }
+    fflush(stdout);
+}
+
+
+void trap(uint16_t instruction) { 
+    /*
+    
+    Instruction format 
+     
+    |-------------------------------------------|
+    | 1 1 1 1 | 0 0 0 0|      trapvect8         |
+    |-------------------------------------------|
+
+    Trap code is 8 bit
+
+    TRAP_GETC = 0x20,        get character from keyboard, not echoed onto the terminal
+    TRAP_OUT = 0x21,         output a character
+    TRAP_PUTS = 0x22,        output a word string 
+    TRAP_IN = 0x23,          get character from keyboard, echoed onto the terminal 
+    TRAP_PUTSP = 0x24,       output a byte string
+    TRAP_HALT = 0x25         halt the program 
+
+    [note] : First R7 is loaded with the incremented PC. 
+    (This enables a return to the instruction physically following the TRAP 
+    instruction in the original program after the service routine has completed execution.) 
+    Then the PC is loaded with the starting address of the system call specified by trapvector8. 
+    The starting address is contained in the memory location whose address is 
+    obtained by zero-extending trapvector8 to 16 bits.
+    */
+
+    uint16_t trapCode  = instruction & 0xFF;   
+    switch(trapCode) { 
+        case TRAP_GETC: 
+            trapGetC(); 
+            break; 
+        case TRAP_OUT: 
+            trapOut(); 
+            break; 
+        case TRAP_PUTS: 
+            trapPuts(); 
+            break; 
+        case TRAP_IN: 
+            trapIn(); 
+            break ; 
+        case TRAP_PUTSP: 
+            trapPutSP(); 
+            break; 
+        case TRAP_HALT : 
+            trapHalt(); 
+            break; 
+    }
+}
+
