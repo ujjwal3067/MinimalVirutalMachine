@@ -543,11 +543,13 @@ void trapGetC() {
      The character is not echoed onto the console. Its ASCII code is copied into R0.
      The high eight bits of R0 are cleared.
      */
-  registers[R_R0]  = (uint16_t getchar()); 
+
+    // get a single ASCII char
+    registers[R_R0]  = (uint16_t) getchar(); 
 } 
 
 
-void trapPutSP(){ 
+void trapPuts(){ 
     /*
      PUTS trap code is used to output a null-terminated string ( similar to printf in C) 
      character are not stored in single byte, but in a single memory location. Memory location in LC-3
@@ -563,13 +565,70 @@ void trapPutSP(){
      */
 
     // one char per word
-    uint16_t* character = memory + register[R_R0]; 
+    uint16_t* character = memory + registers[R_R0]; 
     while(*character) { 
-        char char1 = (*character) >> 0xFF ; 
-        putc(char1, stdout); 
+        putc((char)*character, stdout); 
         ++character;  // increment the memory location  
     }
     fflush(stdout);
+}
+
+
+void trapPuts() { 
+    /*
+    Write a character in R0[7:0] to the console display.
+     */
+    putc((char)registers[R_R0], stdout); 
+    fflush(stdout);
+}
+
+void trapIn() { 
+    /**
+     Print a prompt on the screen and read a single character from the keyboard. 
+     The character is echoed onto the console monitor, and its ASCII code is copied into R0. 
+     The high eight bits of R0 are cleared.
+     */ 
+    printf("Enter a character"); 
+    char c = getchar(); 
+    putc(c, stdout); 
+    fflush(stdout);
+    registers[R_R0]= (uint16_t)c; 
+    update_flags(R_R0);
+}
+
+void trapPutSP() { 
+    /*
+     Write a string of ASCII characters to the console. 
+     The characters are contained in consecutive memory locations,
+     two characters per memory location, starting with the address specified in R0. 
+     The ASCII code contained in bits [7:0] of a memory location is written to the console first. 
+     Then the ASCII code contained in bits [15:8] of that memory location is written to the console. 
+     (A character string consisting of an odd number of characters to be written will have 
+     x00 in bits [15:8] of the memory location containing the last character to be written.)
+     Writing terminates with the occurrence of x0000 in a memory location.
+     */
+
+    //one char per byte ( two bytes ( 16 bit ) per word )
+    uint16_t * character = memory + registers[R_R0]; 
+    while(*character) { 
+
+        // 8 bits [7:0] ( rightmost )
+        char char1 = (*character) & 0xFF ; 
+        putc(char1, stdout);
+
+        // second 8 bits [15:8] (leftmost)
+        char char2 = (*character) >>8 ; 
+        if (char2) putc(char2, stdout);
+        ++character; 
+    }
+    fflush(stdout);
+}
+
+void trapHalt(){ 
+    puts("HALT"); 
+    fflush(stdout);
+    running = 0 ; 
+    exit(0); // if you don't want to quite running program comment this line
 }
 
 
