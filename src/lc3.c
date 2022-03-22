@@ -108,5 +108,6 @@ fn main(int argc, const char* argv[]) {
 
     // fetch and execute using switch statement
 
+    fetchExecute(); 
     restore_input_buffering(); 
 }
