@@ -410,3 +410,67 @@ void loadEffectiveAddress(uint16_t instruction) {
     registers[r0] = registers[R_PC] + pc_offset; 
     update_flags(r0);
 } 
+
+void not(uint16_t instruction) { 
+    /*
+     
+   Instruction format 
+
+    15          Dest    Src    Mode             0
+    |-------------------------------------------|
+    | 1 0 0 1 | D D D | S S S | 1 | 1 1 1 1 1   |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 1 0 0 1 |  DR   |  SR1  | 1 | 1 1 1 1 1   |
+    |-------------------------------------------|
+
+    DR  = D D D = 3-bit Destination Register
+    SR1 = S S A = 3-bit Source Register
+
+    note : The bit-wise complement of the contents of SR is stored in DR.
+    The condition codes are set, based on whether the binary value produced, 
+    taken as a 2’s complement integer, is negative, zero, or positive.
+
+     */
+
+    uint16_t r0 = (instruction >> 9) & 0x7 ; 
+    uint16_t r1 = (instruction >> 6) & 0x7 ; 
+
+    registers[r0] = ~registers[r1]; // bitwise NOT operation 
+    update_flags(r0); 
+}
+
+
+void store(uint16_t instruction) { 
+    /*
+    Instruction format
+
+     15          Src    PCOffset9                0
+    |-------------------------------------------|
+    | 0 0 1 1 | S S S | P P P P P P P P P       |
+    |-------------------------------------------|
+
+    |-------------------------------------------|
+    | 0 0 1 1 |   SR  |     PCoffset9           |
+    |-------------------------------------------|
+
+    SR = S S S = 3-bit Source Register
+    P P P P P P P P P = PCOffset9
+
+    Sign extend PCOffset9, add to PC, and read
+    the value from the source register into
+    that memory location
+
+    note : The contents of the register specified by SR are stored in the memory location whose address is
+    computed by sign-extending bits [8:0] to 16 bits and adding this value to the incremented PC. 
+     */
+
+
+    uint16_t r0 = (instruction >> 9) & 0x7;  
+    uint16_t pc_offset = sign_extend(instruction & 0x1FF, 9);
+    mem_write(registers[R_PC] + pc_offet, registers[r0]);
+}
+
+
+
